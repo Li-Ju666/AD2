@@ -3,8 +3,8 @@
 '''
 Assignment 2, Problem 1: Search String Replacement
 
-Team Number:   
-Student Names: 
+Team Number:   55
+Student Names: Li Ju and Georgios Panayiotou
 '''
 
 '''
