@@ -3,8 +3,8 @@
 '''
 Assignment 2, Problem 1: Search String Replacement
 
-Team Number:
-Student Names:
+Team Number:   
+Student Names: 
 '''
 
 '''
@@ -129,8 +129,6 @@ def min_difference_align(u,r,R):
     return A[len(u)][len(r)], checked_r, checked_u
 
 
-
-
 def qwerty_distance():
     """Generates a QWERTY Manhattan distance resemblance matrix
 
@@ -166,46 +164,3 @@ def qwerty_distance():
                 if b in contentB:
                     R[a][b] = int(math.fabs(rowB - rowA) + math.fabs(posA - contentB.index(b)))
     return R
-
-class MinDifferenceTest(unittest.TestCase):
-    """Test Suite for search string replacement problem
-
-    Any method named "test_something" will be run when this file is
-    executed. Use the sanity check as a template for adding your own test
-    cases if you wish.
-    (You may delete this class from your submitted solution.)
-    """
-
-    def test_diff_sanity(self):
-        """Difference sanity test
-
-        Given a simple resemblance matrix, test that the reported
-        difference is the expected minimum. Do NOT assume we will always
-        use this resemblance matrix when testing!
-        """
-        alphabet = ascii_lowercase + '-'
-        # The simplest (reasonable) resemblance matrix:
-        R = dict( [ (
-                     a,
-                     dict( [ ( b, (0 if a==b else 1) ) for b in alphabet ] )
-                    ) for a in alphabet ] )
-        # Warning: we may (read: 'will') use another matrix!
-        self.assertEqual(min_difference("dinamck","dynamic",R),3)
-    def test_align_sanity(self):
-        """Simple alignment
-
-        Passes if the returned alignment matches the expected one.
-        """
-        # QWERTY resemblance matrix:
-        R = qwerty_distance()
-        diff, u, r = min_difference_align("polynomial", "exponential", R)
-        # Warning: we may (read: 'will') use another matrix!
-        self.assertEqual(diff, 15)
-        # # Warning: there may be other optimal matchings!
-        # self.assertEqual(u, '--polyn-om-ial')
-        # self.assertEqual(r, 'exp-o-ne-ntial')
-        print(u)
-        print(r)
-
-if __name__ == '__main__':
-    unittest.main()

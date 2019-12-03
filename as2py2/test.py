@@ -12,11 +12,13 @@ def create_graph():
 
 def update_MST_4(G, T, e, w):
     (u, v) = e
-    assert (e in G.edges() and e in T.edges() and w > G[u][v]['weight'])
-    print(G.edges[('a', 'c')])
+    assert (e in G.edges() and e in T.edges())
+
+    G.add_edge(*e, weight = w)
     T.remove_edge(u, v)
     print(list(T.edges))
     print(list(T.adj['a']))
+
 
     def explore(node, parent):
         block = [node]
@@ -47,7 +49,7 @@ def update_MST_4(G, T, e, w):
         weight.append(G.edges[each]['weight'])
     print(weight)
     T.add_edge(*cut_set[weight.index(min(weight))], weight = min(weight))
-    return T
+    return None
 
 
 
