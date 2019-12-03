@@ -1,0 +1,264 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{fullpage}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm} \newtheorem{theorem}{Theorem}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{courier}
+\usepackage{float}
+\usepackage{mathtools} \mathtoolsset{showonlyrefs}
+\usepackage{multirow}
+\usepackage{tikz} \usetikzlibrary{trees}
+\usepackage{listings}
+\lstset{language=Python,
+	basicstyle=\footnotesize\ttfamily,
+	keywordstyle=\color[rgb]{0,0.5,0}\ttfamily,
+	stringstyle=\color{orange}\ttfamily,
+	commentstyle=\color{red}\ttfamily,
+	tabsize=2,
+	numbers=left, numberstyle=\tiny, numbersep=5pt,
+	breaklines=true,
+	breakatwhitespace=true,
+	prebreak={/},
+	captionpos=b,
+	columns=fullflexible,
+	escapeinside={\#*}{\^^M},
+	mathescape
+}
+\usepackage{hyperref}
+
+\counterwithin*{section}{part}
+\renewcommand{\thesection}{\Alph{section}}
+
+\title{\textbf{Algorithms \& Data Structures II (course 1DL231) \\
+    Uppsala University -- Autumn 2019 \\
+    Report for Assignment 2
+    by Team 55}}
+\author{Li Ju and Georgios Panayiotou}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\part{Problem 1: Search String Replacement Problem}
+\section{Recursive equation}
+
+For the problem given, which we will refer to as $min\_difference(u, r, R)$, in which u and r are two strings to be compared and R is the difference matrix given. we recognize that the solution can be split into numerous sub-problems by summing results of selected sub\_problems (minimum difference of sub\_strings) up. Therefore, dynamic programming is applicable to solve the problem.\\
+
+We define $OPT(i,j)$ as the recursive function for our solution, representing the minimum difference between two sub\_strings made by first $ith$ characters of $u$ and first $jth$ characters of $r$. $OPT(i,j)$ is the minimum of 1. distance between $\mbox{-}$ and $r[j]$ plus $OPT(i, j-1)$; 2. distance between $u[i]$ and $\mbox{-}$ plus $OPT(i-1, j)$ and 3. distance between $u[i]$ and $r[j]$ plus $OPT(i-1, j-1)$, when $i>0$ and $j>0$. When $i$ or $j$ reaches $0$, $OPT(i, j)$ is the sum of difference between $-$ and every left character in the string. \\
+
+The recursive equation follows: 
+$$OPT(i,j)=
+    \begin{cases}
+    \min \{dis(\mbox{-}, r[j])+OPT(i, j-1), \; dis(u[i], \mbox{-})+OPT(i-1, j), \\
+    \; \; \; \; \; \; \; \; dis(u[i], r[j])+OPT(i-1, j-1) \} & \text{if~} i>0, j>0\\
+    dis(\mbox{-}, r[j])+OPT(i, j-1) & \text{if~} i=0, j>0\\
+    dis(\mbox{-}, u[i])+OPT(i-1, j) & \text{if~} i>0, j=0\\
+    0 & \text{if~} i=0, j=0
+    \end{cases}$$
+where $dis(char1, char2)$: the distance between $char1$ and $char2$ obtained from given distance matrix $R$, $i$ and $j$: indicating that the sub\_string made by first $ith$ letters of $u$ and sub\_string made by first $jth$ letters of $r$ are being compared to get their minimum difference.\\
+
+Our equation is obviously 0 for $i=0$ and $j=0$ since the minimum difference between two empty string is definitely 0. Also for case when $i=0, j>0$ or when $i>0, j=0$, all we need to do is to sum up distances between hyphen and each letter of string which is not empty, as we present in the recursive equation, calculating each distance letter by letter and summing up recursively.\\
+
+As for the rest of the values, we know that when comparing two string $u$ and $r$ at a specific position $i$ and $j$, there are three different cases: 1. move $u$ left (leave a hyphen), compare $\mbox{-}$ and $r[j]$, and move on to sub\_problem $OPT(i, j-1)$, 2. move $r$ left (again, leave a hyphen), compare $u[i]$ and $\mbox{-}$, and move on to sub\_problem $OPT(i-1, j)$, or 3. compare $u[i]$ and $r[j]$ and move on to sub\_problem $OPT(i-1, j-1)$. Among the three cases, we need to find the minimum one to be the result of current sub\_problem. 
+
+When the calculation of all values is done, the solution for $min\_difference(u, r, R)$ will be equal to $OPT(u.length,r.length)$'s value.\\
+
+\section{Algorithm design: returning the minimum difference between two strings}
+\paragraph{}
+For the $min\_difference(u, r, R)$ problem and considering the equation given above, we create a top-down dynamic programming algorithm, and use memoization to reduce complexity. For that purpose, we define a matrix A of size [u.length+1,r.length+1], which will save the values calculated for each sub\_problem.\\
+We define the following algorithm:\\
+
+\begin{lstlisting}
+min_difference(u, r, R):
+    A[u.length+1][r.length+1]=$\emptyset$
+    
+    min_dif(i,j):
+        if i<0 or j<0: result = inf
+        else if A[i][j]=$\emptyset$:
+            if i=0 and j=0:
+                result=0
+            else:
+                result=min(
+                    min_dif(i-1,j)+R[u[i-1]][-], 
+                    min_dif(i,j-1)+R[-][r[j-1]], 
+                    min_dif(i-1,j-1)+R[u[i-1]][r[j-1]], 
+                    )
+            A[i][j]=result
+        else: result=A[i][j]
+        return result
+    
+    A[n][t]=min_dif(u.length,r.length)
+    return A[u.length][r.length]
+\end{lstlisting}
+    
+Executing the algorithm described will return the minimum difference between the given two strings $u$ and $r$.\\
+
+Below, in Listing 1, follows our implementation of the algorithm described above. \\
+
+\begin{lstlisting}[caption={Returning the minimum difference},label={2nd1_1}]
+def min_difference(u,r,R):
+    """
+    Sig:  string, string, int[0..|A|, 0..|A|] ==> int
+    Pre:  u and r are strings to be compared, while R is the resemblance matrix
+    Post: the function returns the minimal differences between two given strings
+    Ex:   Let R be the resemblance matrix where every change and skip costs 1
+          min_difference("dinamck","dynamic",R) ==> 3
+    """
+    # To get the resemblance between two letters, use code like this:
+    # difference = R['a']['b']
+    A = [[None for i in range(len(r)+1)] for j in range(len(u)+1)]  ## Result matrix with initial values of None
+    def min_dif(i, j):
+        ## the funtion to return the result of subproblem:
+        ## if the result existing in the matrix, return the value from matrix A;
+        ## if not, calculate the matrix recursively, and save the value in the matrix A
+        if i < 0 or j < 0: result = float('inf')
+        ## if the length of one sub_string (eg. i) to be compared reduce to 0 while another does not,
+        # value 'inf' forces recursive function goes to case in which j = j-1 and i keeps 0.
+        elif A[i][j] is None:
+            ## if both strings reduce to empty, return distance between '-' and '-'
+            if i == 0 and j == 0:
+                result = R['-']['-']
+            else:
+                ## According to the OPT, optimal choice is the minimum of following 3 cases
+                result = min(
+                    min_dif(i-1, j) + R[u[i-1]]['-'],
+                    min_dif(i, j-1) + R['-'][r[j-1]],
+                    min_dif(i-1, j-1) + R[u[i-1]][r[j-1]])
+            A[i][j] = result
+        else: result = A[i][j]
+        return result
+    ## calculate the result of the entire problem, subproblems will be calculated and results will be stored in matrix A.
+    A[len(u)][len(r)] = min_dif(len(u), len(r))
+    return A[len(u)][len(r)]
+\end{lstlisting}
+
+
+\section{Algorithm design: returning the positioning of minimum difference}
+Since we have designed a dynamic programming algorithm that solves the problem described, we can extend that in order to return the positioning of minimum difference that solve the problem. For this purpose, a function named trace\_letter is defined to retrieve $checked\_u$ and $checked\_r$ using backtracking, on the values already calculated.\\
+
+The function follows:\\
+
+\begin{lstlisting}
+    trace_letter(i,j):
+        if i<1 or j<1:
+            checked_u=j*'-'+u[0:i]
+            checked_r=i*'-'+r[0:j]
+        else: 
+            cases=((A[i-1][j] + R[u[i-1]]['-'], A[i][j-1] + R['-'][r[j-1]],
+                          A[i-1][j-1] + R[u[i-1]][r[j-1]]))
+            true_case=min(cases).index
+            if true_case=0: 
+                checked_u, checked_r = trace_letter(i-1, j)
+                checked_u = checked_u + u[i-1]
+                checked_r = checked_r + '-'
+            else if true_case=1: 
+                checked_u, checked_r = trace_letter(i, j-1)
+                checked_u = checked_u + '-'
+                checked_r = checked_r + r[j-1]
+            else: 
+                checked_u, checked_r = trace_letter(i-1, j-1)
+                checked_u = checked_u + u[i-1]
+                checked_r = checked_r + r[j-1]
+            if A[i-1][j] is True:
+                find_subset(i-1,j)
+    return checked_u, checked_r
+\end{lstlisting}
+
+Assuming the values in matrix $A$ are already calculated, the positioning of checked strings can be traced back from the position $A[u.length,r.length]$.\\
+
+If we check the value at the position $A[i,j]$, then three possibilities arise: 1. the value comes from $A[i-1][j] + R[u[i-1]]['-']$, we add $u[i-1]$ into checked\_u and $\mbox{-}$ into checked\_r; 2. the value is from $A[i][j-1] + R['-'][r[j-1]]$, we add $\mbox{-}$ into checked\_u and $r[j-1]$ into checked\_r and 3. the value comes from $A[i-1][j-1] + R[u[i-1]][r[j-1]]$, we add $u[i-1]$ and $r[j-1]$ into checked\_u and checked\_r correspondingly. To retrieve the solution, we start from $A[u.length,r.length]$. \\
+
+The implementation of our algorithm follows below, in Listing 2:\\
+\begin{lstlisting}[caption={Returning positioning},label={2nd1_2}]
+def min_difference_align(u,r,R):
+    """
+    Sig:  string, string, int[0..|A|, 0..|A|] ==> int, string, string
+    Pre: u and r are strings to be compared, while R is the resemblance matrix
+    Post: the function returns the minimal differences between two given strings, and the positioning for the
+          minimum differences.
+    Ex:   Let R be the resemblance matrix where every change and skip costs 1
+          min_difference_align("dinamck","dynamic",R) ==>
+                                    3, "dinam-ck", "dynamic-"
+    """
+    ## Matrix A is the result matrix, as it acts in the previous function.
+    A = [[None for i in range(len(r)+1)] for j in range(len(u)+1)]
+    def min_dif(i, j):
+
+        ## if both strings reduce to empty, return distance between '-' and '-'
+        if i < 0 or j < 0: result = float('inf')
+        ## if the length of one sub_string (eg. i) to be compared reduce to 0 while another does not,
+        # value 'inf' forces j = j-1 and i keeps 0.
+        elif A[i][j] is None:
+            if i == 0 and j == 0:
+                result = R['-']['-']
+            else:
+                result = min(
+                    min_dif(i - 1, j) + R[u[i - 1]]['-'],
+                    min_dif(i, j - 1) + R['-'][r[j - 1]],
+                    min_dif(i - 1, j - 1) + R[u[i - 1]][r[j - 1]])
+            A[i][j] = result
+        else: result = A[i][j]
+        return result
+
+    ## function trace_letter aims to return letters and hyphens of two strings one by one, to show the positioning of
+    ## minimum differences by tracing result matrix A.
+    def trace_letter(i, j):
+        if i < 1 or j < 1:
+            ## if edge of matrix reached (one of i and j is 0, eg. i = 0 and j is not),
+            ## for the 1st string, return j hyphens and for the 2nd string, return first jth chars of original string.
+            checked_u = j*'-' + u[:i]
+            checked_r = i*'-' + r[:j]
+        else:
+            ## list cases contains three different cases and variable true_case indicates from which case value in
+            ## current position is (in another word, which case has the minimum value)
+            cases = (A[i - 1][j] + R[u[i - 1]]['-'], A[i][j - 1] + R['-'][r[j - 1]],
+                          A[i - 1][j - 1] + R[u[i - 1]][r[j - 1]])
+            true_case = cases.index(min(cases))
+            ## In different cases, recursion path is different, following the previous OPT
+            if true_case == 0:
+                checked_u, checked_r = trace_letter(i - 1, j)
+                checked_u = checked_u + u[i - 1]
+                checked_r = checked_r + '-'
+            elif true_case == 1:
+                checked_u, checked_r = trace_letter(i, j - 1)
+                checked_u = checked_u + '-'
+                checked_r = checked_r + r[j - 1]
+            else:
+                checked_u, checked_r = trace_letter(i - 1, j - 1)
+                checked_u = checked_u + u[i - 1]
+                checked_r = checked_r + r[j - 1]
+        return checked_u, checked_r
+
+    A[len(u)][len(r)] = min_dif(len(u), len(r))
+    checked_u, checked_r = trace_letter(len(u), len(r))
+
+    return A[len(u)][len(r)], checked_r, checked_u
+\end{lstlisting}
+
+\section{Time Complexity Analysis}
+
+Our algorithm firstly needs to calculate all values in the matrix A, which is of size $[|u|+1,|r|+1]$. In spite of doing the calculation recursively, all values are being calculated at most once. For each calculation we have a constant time of $\mathcal{O}(1)$, so in the worst case scenario, its time complexity is $\mathcal{O}(|u|\times |r|)$.\\
+
+For the backtracking function in the extended algorithm, we need to retrace the true values in our matrix A. Again, for each cell a check is performed at most once, which takes a constant time of $\mathcal{O}(1)$, despite calling the function recursively. Therefore, in the worst case the backtracking algorithm has a time complexity of $\mathcal{O}(|u|\times |r|)$.\\
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+\part{Problem 2: Recomputing a Minimum Spanning Tree}
+
+\end{document}
