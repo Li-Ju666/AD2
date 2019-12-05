@@ -8,7 +8,7 @@
 \usepackage{amsthm} \newtheorem{theorem}{Theorem}
 \usepackage{booktabs}
 \usepackage{color}
-\usepackage{courier}
+\usepackage{courier} 
 \usepackage{float}
 \usepackage{mathtools} \mathtoolsset{showonlyrefs}
 \usepackage{multirow}
@@ -50,7 +50,7 @@
 
 For the problem given, which we will refer to as $min\_difference(u, r, R)$, in which u and r are two strings to be compared and R is the difference matrix given. we recognize that the solution can be split into numerous sub-problems by summing results of selected sub\_problems (minimum difference of sub\_strings) up. Therefore, dynamic programming is applicable to solve the problem.\\
 
-We define $OPT(i,j)$ as the recursive function for our solution, representing the minimum difference between two sub\_strings made by first $ith$ characters of $u$ and first $jth$ characters of $r$. $OPT(i,j)$ is the minimum of 1. distance between $\mbox{-}$ and $r[j]$ plus $OPT(i, j-1)$; 2. distance between $u[i]$ and $\mbox{-}$ plus $OPT(i-1, j)$ and 3. distance between $u[i]$ and $r[j]$ plus $OPT(i-1, j-1)$, when $i>0$ and $j>0$. When $i$ or $j$ reaches $0$, $OPT(i, j)$ is the sum of difference between $-$ and every left character in the string. \\
+We define $OPT(i,j)$ as the recursive function for our solution, representing the minimum difference between two sub\_strings made by first $ith$ characters of $u$ and first $jth$ characters of $r$. $OPT(i,j)$ is the minimum of: \\1. distance between $\mbox{-}$ and $r[j]$ plus $OPT(i, j-1)$; \\2. distance between $u[i]$ and $\mbox{-}$ plus $OPT(i-1, j)$; \\3. distance between $u[i]$ and $r[j]$ plus $OPT(i-1, j-1)$, \\when $i>0$ and $j>0$. \\When $i$ or $j$ reaches $0$, $OPT(i, j)$ is the sum of difference between $-$ and every left character in the string. \\
 
 The recursive equation follows: 
 $$OPT(i,j)=
@@ -245,20 +245,112 @@ def min_difference_align(u,r,R):
 
 Our algorithm firstly needs to calculate all values in the matrix A, which is of size $[|u|+1,|r|+1]$. In spite of doing the calculation recursively, all values are being calculated at most once. For each calculation we have a constant time of $\mathcal{O}(1)$, so in the worst case scenario, its time complexity is $\mathcal{O}(|u|\times |r|)$.\\
 
-For the backtracking function in the extended algorithm, we need to retrace the true values in our matrix A. Again, for each cell a check is performed at most once, which takes a constant time of $\mathcal{O}(1)$, despite calling the function recursively. Therefore, in the worst case the backtracking algorithm has a time complexity of $\mathcal{O}(|u|\times |r|)$.\\
+For the backtracking function in the extended algorithm, we need to retrace values from 3 possibilities in our matrix A. Again, for each cell a check is performed at most once, which takes a constant time of $\mathcal{O}(1)$, despite calling the function recursively. Therefore, in the worst case the backtracking algorithm has a time complexity of $\mathcal{O}(|u|\times |r|)$.\\
 \newpage
 
-
-
-
-
-
-
-
-
-
-
-
 \part{Problem 2: Recomputing a Minimum Spanning Tree}
+\section{Algorithms: Updating a Minimum Spanning Tree}
+\paragraph{Add math notation}
+For the problem of incrementally increasing a MST $T$ when the weight $w(e)$ of an edge $e\in E$ increases to $w'(e)$, given a graph $G=(V,E)$ and its MST $T=(V,E')$, four different cases arise.\\
+
+\paragraph{Rewrite cases as in assignment}
+Efficient algorithms can be designed to update the MST for each case. An explanation for each follows:
+
+\paragraph{Case 1}
+Since $e\notin E'$, we know that a spanning tree $T'=(V,E'')$ where $e\in E''$ is either not a MST, or a MST having the same total tree weight with $T$. By increasing the weight of $e$, the total weight of $T'$ becomes greater than that of $T$ in either of these cases, which does not lead to a MST.\\
+Therefore, for this case, we do not make any changes to $T$.\\
+Since we do not need to do any actions for this case, time needed is $O(0)$, which by definition also belongs in $O(|V|)$.\\
+
+\paragraph{Case 2}
+Since $e\notin E'$ and its weight is decreased, we have to check whether its addition to T' and a removal of another edge from it leads to a new MST.\\
+We design an algorithm to update the MST based on that principle. Firstly, we add $e$ to $E'$. Based on MST's cyclic property, we know that now we have a single cycle, $C$, in $T$. We retrieve $C=(V',E'')$ traversing the tree using BFS, find the edge $e'\in E''$ having the maximum weight in $T'$, and remove $e'$ from $T'$. This results in the updated MST.\\
+We argue that the time complexity of the algorithm is $O(|V|)$. Adding an edge to $T'$ takes a constant time $O(1)$, retrieving the cycle from $T'$, as proven previously in Assignment 1: Problem 2 can take $O(|V|)$ time, and traversing all edges in $C$ order to find $e'$ takes $O(|E''|)$ time. But since our cycle has at most $|E'|$ edges, and $|E'|$ is bounded by $|V|$, the time needed is $O(|V|)$.\\
+In total, time needed is $O(1)+O(|V|)+O(|V|)=O(|V|)$.\\
+
+\paragraph{Case 3}
+Since $e \in E'$, we know that removing this edge and adding another edge $i$ that connects the two cuts created by its removal leads to a spanning tree $T'=(V,E'')$, $i\in E''$, that is either not minimum, or a MST having the same total tree weight with that of $T$. By decreasing the weight of $e$, the total weight of $T$ becomes less than the total tree weight of $T'$ in either case, since $e \notin E''$, so T will remain the MST of $G$.\\
+Therefore, we do not need to make any changes to $T$.\\
+No actions are needed for this case, so our time complexity is $O(0)$, which is also in $O(|V|)$.\\
+
+\paragraph{Case 4}
+The edge updated, $e\in E'$, so we have to check whether its removal from $E'$ and addition of another one from $E$ leads to a new MST.\\
+The algorithm for the update is as follows: We remove $e=(A,B)$ from $E'$. Then $T$ is left with two unconnected cuts, $C_{1}=(V_{1},E_{1})$ and $C_{2}=(V_{2},E_{2})$. We traverse $T'$ using BFS twice, once with node $A$ as root and once with $B$ as root, in order to retrieve $C_{1}$ and $C_{2}$. Then, for all edges $e'(A,B)\in (E-E')$, where $A\in C_{1}$ and $B\in C_{2}$, we find the one with the minimum weight, and add it to $T$. This gives us the updated MST.\\
+The algorithm has a time complexity of $O(|E|)$. Removing an edge has a constant time of $O(1)$. We also have two BFS traversals for the two cuts, which in total take $O(|V|+|E'|)$ total time since $|V_{1}|+|V_{2}|=|V|$ and $|E_{1}|+|E_{2}|=|E'| -1$. But, since for an MST $|V|=|E'|-1$, and $|E'| \leq |E|$, the total time needed for a traversal is $O(|E|)+O(|E|)=O(|E|)$. Finally, we need to loop all edges in $E-E'$ to find the minimum weight edge, which takes a total time of $O(|E|)$.\\
+In total, time needed is $O(1)+O(|E|)+O(|E|)+O(|E|)=O(|E|)$.\\
+
+\section {Implementation of algorithm: Case 4}
+We have implemented in Python the algorithm for Case 4 described in the previous section. The implementation follows:
+
+\begin{lstlisting}
+def update_MST_4(G, T, e, w):
+    """
+    # Sig: graph G(V,E), graph T(V, E), edge e, int ==> graph G with updated edge e, updated graph T (MST of G)
+    # Pre: A connected graph G, a subgraph T, which is the minimum spanning tree (MST) of G, an edge e to be
+           updated which is in both G and T with a weight w greater than original weight of e.
+    # Post: G is updated with the weight w(e), T is a minimum spanning tree of G.
+    # Ex:  TestCase 4 below
+    """
+    (u, v) = e
+    ## To check if given e is satisfied with the case:
+    assert (e in G.edges() and e in T.edges() and w > G[u][v]['weight'])
+
+    ## To update G with given edge e
+    G.add_edge(*e, weight = w)
+
+    ## remove the changed edge, for it is not guaranteed to be in the MST
+    T.remove_edge(u, v)
+    # print(list(T.edges))
+    # print(list(T.adj['a']))
+
+    ## DFS traversal, returning all nodes in a tree.
+    def return_cut(n,p):
+    	"""
+    	# Sig:  node, node --> list
+    	# Pre:  n,p belong in V and there exists an edge e=(p,n) which belongs in E
+    		    for an acyclic undirected graph G=(V,E)
+    	# Post: list of n and all of its children
+    	# Ex:   V=[1,2,3,4], E={(1,2),(2,3),(2,4)}
+    			return_cut(1,None)=[1,2,3,4]
+    			return_cut(2,None)=[2,1,3,4]
+    			return_cut(2,1)=[2,3,4]
+    	"""
+        cut = [n]
+        children = list(T.adj[n])
+        if p is not None:
+            children.remove(p)
+
+        # Loops over every node N belonging to G
+        for c in children:
+        	# Recursive call to return lists of all children of n
+            cut = cut+return_cut(c,n)
+        return cut
+
+    ## DFS to find out two unconnected cuts of T created by removal of e
+    cut_a = return_cut(u, None)
+    cut_b = return_cut(v, None)
+
+    ## To define a dictionary, in which nodes in cut 1 are noted as -1, while nodes in cut 2 are noted as -1
+    dic = dict.fromkeys(cut_a, -1)
+    dic.update(dict.fromkeys(cut_b, 1))
+
+    ## To find all edges connnecting the two cuts
+    edges = list(G.edges)
+    cut_set = []
+    ## For those edges whose two nodes are in different blocks, the sum of dictionary values of two nodes are exactly 0
+    # Loops over all edges in E
+    for each in edges:
+        if dic[each[0]]+dic[each[1]] == 0:
+            cut_set.append(each)
+
+    ## To find the minimum edge connecting the two cuts
+    weight = []
+    # Loops over all edges in cut_set
+    for each in cut_set:
+        weight.append(G.edges[each]['weight'])
+
+    ## add the minimum edge into graph T, which is the recomputed MST of updated G
+    T.add_edge(*cut_set[weight.index(min(weight))], weight = min(weight))
+    return None
+\end{lstlisting}
 
 \end{document}
