@@ -40,36 +40,6 @@ try:
 except:
     have_plt = False
 
-def update_MST_1(G, T, e, w):
-    """
-    Sig:  graph G(V,E), graph T(V, E), edge e, int ==> 
-    Pre:  
-    Post: 
-    Ex:   TestCase 1 below
-    """
-    (u, v) = e
-    assert(e in G.edges() and e not in T.edges() and w > G[u][v]['weight'])
-
-def update_MST_2(G, T, e, w):
-    """
-    Sig:  graph G(V,E), graph T(V, E), edge e, int ==> 
-    Pre:  
-    Post: 
-    Ex:   TestCase 2 below
-    """
-    (u, v) = e
-    assert(e in G.edges() and e not in T.edges() and w < G[u][v]['weight'])
-
-def update_MST_3(G, T, e, w):
-    """
-    Sig:  graph G(V,E), graph T(V, E), edge e, int ==> 
-    Pre:  
-    Post: 
-    Ex:   TestCase 3 below
-    """
-    (u, v) = e
-    assert(e in G.edges() and e in T.edges() and w < G[u][v]['weight'])
-
 def update_MST_4(G, T, e, w):
     """
     # Sig: graph G(V,E), graph T(V, E), edge e, int ==> graph G with updated edge e, updated graph T (MST of G)
@@ -108,13 +78,17 @@ def update_MST_4(G, T, e, w):
             children.remove(p)
 
         # Loops over every node N belonging to G
+        # Loop variant: number of children not checked decreases
         for c in children:
             # Recursive call to return lists of all children of n
+            # Recursive variant: number of unvisited nodes decreases
             cut = cut+return_cut(c,n)
         return cut
 
     ## DFS to find out two unconnected cuts of T created by removal of e
+    # Recursive variant: number of unvisited nodes in cut_a that can be reached from u decreases.
     cut_a = return_cut(u, None)
+    # Recursive variant: number of unvisited nodes in cut_b that can be reached from u decreases.
     cut_b = return_cut(v, None)
 
     ## To define a dictionary, in which nodes in cut 1 are noted as -1, while nodes in cut 2 are noted as -1
@@ -126,6 +100,7 @@ def update_MST_4(G, T, e, w):
     cut_set = []
     ## For those edges whose two nodes are in different blocks, the sum of dictionary values of two nodes are exactly 0
     # Loops over all edges in E
+    # Loop variant: number of edges in E not checked decreases
     for each in edges:
         if dic[each[0]]+dic[each[1]] == 0:
             cut_set.append(each)
@@ -133,106 +108,10 @@ def update_MST_4(G, T, e, w):
     ## To find the minimum edge connecting the two cuts
     weight = []
     # Loops over all edges in cut_set
+    # Loop variant: number of edges in cut_set not checked decreases
     for each in cut_set:
         weight.append(G.edges[each]['weight'])
 
     ## add the minimum edge into graph T, which is the recomputed MST of updated G
     T.add_edge(*cut_set[weight.index(min(weight))], weight = min(weight))
     return None
-
-class RecomputeMstTest(unittest.TestCase):
-    """Test Suite for minimum spanning tree problem
-
-    Any method named "test_something" will be run when this file is
-    executed. Use the sanity check as a template for adding your own
-    test cases if you wish.
-    (You may delete this class from your submitted solution.)
-    """
-
-    def create_graph(self):
-        G = nx.Graph()
-        G.add_edge('a', 'b', weight=0.6)
-        G.add_edge('a', 'c', weight=0.2)
-        G.add_edge('c', 'd', weight=0.1)
-        G.add_edge('c', 'e', weight=0.7)
-        G.add_edge('c', 'f', weight=0.9)
-        G.add_edge('a', 'd', weight=0.3)
-        return G
-
-    def draw_mst(self, G, T, n):
-        if not have_plt:
-            return
-        pos = nx.spring_layout(G)  # positions for all nodes
-        plt.subplot(220 + n)
-        plt.title('updated MST %d' % n)
-        plt.axis('off')
-        # nodes
-        nx.draw_networkx_nodes(G, pos, node_size=700)
-        # edges
-        nx.draw_networkx_edges(G, pos, width=6, alpha=0.5,
-                               edge_color='b', style='dashed')
-        nx.draw_networkx_edges(T, pos, width=6)
-        # labels
-        nx.draw_networkx_labels(G, pos, font_size=20, font_family='sans-serif')
-
-    # def test_mst1(self):
-    #     """Sanity Test
-    #
-    #     This is a simple sanity check for your function;
-    #     passing is not a guarantee of correctness.
-    #     """
-    #     # TestCase 1: e in G.edges() and not e in T.edges() and
-    #     #             w > G[u][v]['weight']
-    #     G = self.create_graph()
-    #     T = nx.minimum_spanning_tree(G)
-    #     update_MST_1(G, T, ('a', 'd'), 0.5)
-    #     self.draw_mst(G, T, 1)
-    #     self.assertItemsEqual(
-    #         T.edges(),
-    #         [('a', 'b'), ('a', 'c'), ('c', 'd'), ('c', 'e'), ('c', 'f')]
-    #     )
-    #
-    # def test_mst2(self):
-    #     # TestCase 2: e in G.edges() and not e in T.edges() and
-    #     #             w < G[u][v]['weight']
-    #     G = self.create_graph()
-    #     T = nx.minimum_spanning_tree(G)
-    #     update_MST_2(G, T, ('a', 'd'), 0.1)
-    #     self.draw_mst(G, T, 2)
-    #     self.assertItemsEqual(
-    #         T.edges(),
-    #         [('a', 'b'), ('a', 'd'), ('c', 'd'), ('c', 'e'), ('c', 'f')]
-    #     )
-    #
-    # def test_mst3(self):
-    #     # TestCase 3: e in G.edges() and e in T.edges() and
-    #     #             w < G[u][v]['weight']
-    #     G = self.create_graph()
-    #     T = nx.minimum_spanning_tree(G)
-    #     update_MST_3(G, T, ('a', 'c'), 0.1)
-    #     self.draw_mst(G, T, 3)
-    #     self.assertItemsEqual(
-    #         T.edges(),
-    #         [('a', 'b'), ('a', 'c'), ('c', 'd'), ('c', 'e'), ('c', 'f')]
-    #     )
-
-    def test_mst4(self):
-        # TestCase 4: e in G.edges() and e in T.edges() and
-        #             w > G[u][v]['weight']
-        G = self.create_graph()
-        T = nx.minimum_spanning_tree(G)
-        update_MST_4(G, T, ('a', 'c'), 0.4)
-        self.draw_mst(G, T, 4)
-        self.assertItemsEqual(
-            T.edges(),
-            [('a', 'b'), ('a', 'd'), ('c', 'd'), ('c', 'e'), ('c', 'f')]
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        if have_plt:
-            plt.show()
-
-
-if __name__ == '__main__':
-    unittest.main()
