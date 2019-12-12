@@ -3,8 +3,8 @@
 '''
 Assignment 3, Problem 2: Party Seating
 
-Team Number:   
-Student Names: 
+Team Number:   55
+Student Names: Li Ju, Georgios
 '''
 
 '''
@@ -95,5 +95,48 @@ def party(known):
             else: table2.append(each)
     return result, table1, table2
 
-known = [[1, 3], [0], [3], [2, 0], [5], [4]]
-print(party(known))
+class PartySeatingTest(unittest.TestCase):
+    """Test suite for party seating problem
+    """
+
+    def test_sanity(self):
+        """Sanity test
+
+        A minimal test case.
+        """
+        K = [[1,2],[0],[0]]
+        (found, A, B) = party(K)
+        self.assertEqual(
+            len(A) + len(B),
+            len(K),
+            "wrong number of guests: {!s} guests, tables hold {!s} and {!s}".format(
+                len(K),
+                len(A),
+                len(B)
+                )
+            )
+        for g in range(len(K)):
+            self.assertTrue(
+                g in A or g in B,
+                "Guest {!s} not seated anywhere".format(g))
+        for a1 in A:
+            for a2 in A:
+                self.assertFalse(
+                    a2 in K[a1],
+                    "Guests {!s} and {!s} seated together, and know each other".format(
+                        a1,
+                        a2
+                        )
+                    )
+        for b1 in B:
+            for b2 in B:
+                self.assertFalse(
+                    b2 in K[b1],
+                    "Guests {!s} and {!s} seated together, and know each other".format(
+                        b1,
+                        b2
+                        )
+                    )
+
+if __name__ == '__main__':
+    unittest.main()
