@@ -27,6 +27,13 @@ import unittest
 from collections import deque
 
 def party(known):
+
+    ## This function used a DFS-like algorithm, exploring the graph from a random undiscovered node. As problem described,
+    ## not two connected nodes are supposed to arranged in one table, so along the edge we arrange. The starting node
+    ## and the ending node of a edge is arranged in two list. If following all edges every node is put into 2 lists perfectly
+    ## without any contradiction, the arrangement is available, otherwise a contradiction (two arranged nodes which are in
+    ## the same list are connected) will occur and a False is returned. As all nodes and edges are traversed, therefore,
+    ## the time complexity of the algorithm is like classic DFS, O(|E|+|V|).
     """
     Sig:  int[1..m, 1..n] ==> boolean, int[1..j], int[1..k]
     Pre:  a list of list, in which stored the edges between nodes
