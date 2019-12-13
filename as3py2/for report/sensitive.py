@@ -120,7 +120,7 @@ def sensitive(G, s, t, F):
     sens_edges = []
     for each in satur_edges:
         ## to find which saturated edges are among the minimum cut
-        if reachable_dict[each[0]] + reachable_dict[each[1]] == 0:
+        if reachable_dict[each[0]] == 1 and reachable_dict[each[1]] == -1:
             sens_edges.append(each)
     ## return any edge of sensitive edges: because of the theorem of maxflow-minicut, it is
     ## guaranteed that there is at least one edge is sensitive
